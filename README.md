@@ -1,2 +1,3 @@
 # tilly
-Today I Learned
+
+CLI for easily creating Today I Learned posts...
