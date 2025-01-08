@@ -3,6 +3,7 @@ from .plugins import plugin_manager
 
 # Define the main command group for the CLI
 @click.group()
+@click.version_option()
 def cli():
     """TIL (Today I Learned) Command Line Interface."""
     pass
@@ -22,3 +23,4 @@ def list_plugins():
             click.echo(f"- {plugin}")
     else:
         click.echo("No plugins installed.")
+
