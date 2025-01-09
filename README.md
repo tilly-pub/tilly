@@ -13,12 +13,14 @@ uv pip install tilly
 
 ```
 til hello
+Hello from the TIL CLI!
 ```
 
 or
 
 ```
-tilly hello
+$ tilly hello
+Hello from the TIL CLI!
 ```
 
 ## Creating plugins
