@@ -11,7 +11,7 @@ setuptools.setup(
     description="A cli for tracking Things I Learned (TIL)",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/orangewise/tilly",
+    url="https://github.com/tilly-pub/tilly",
     packages=setuptools.find_packages(),
     install_requires=[
         "click>=8.0",
