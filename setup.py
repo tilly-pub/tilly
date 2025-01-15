@@ -3,6 +3,9 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open('requirements.txt', 'r') as f:
+    requirements = [line.strip().split('#')[0] for line in f.read().split('\n') if line.strip().split('#')[0]]
+
 setuptools.setup(
     name="tilly",
     version="0.0.2",
@@ -13,11 +16,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/tilly-pub/tilly",
     packages=setuptools.find_packages(),
-    install_requires=[
-        "click>=8.0",
-        "pluggy>=1.0",
-        "setuptools"
-    ],
+    install_requires=requirements,
     entry_points={
         "console_scripts": [
             "til = tilly.main:cli",
