@@ -11,6 +11,30 @@ source .venv/bin/activate
 uv pip install tilly
 ```
 
+## tilly commands
+
+<!-- cli-help starts -->
+```bash
+Usage: tilly [OPTIONS] COMMAND [ARGS]...
+
+  TIL (Today I Learned) Command Line Interface.
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  build           Build database tils.db.
+  config          List config.
+  copy-templates  Copy default templates to current repo for customization.
+  gen-static      Generate static site from tils.db using datasette.
+  hello           Say hello.
+  list-plugins    List all available plugins.
+  serve           Serve tils.db using datasette or the generated static...
+```
+<!-- cli-help ends -->
+
+
 ## Usage
 
 Create a repo (or clone a repo from github):
@@ -81,6 +105,7 @@ Customized templates can also be served locally:
 ```
 tilly serve --template-dir templates
 ```
+
 
 
 ## Creating plugins
