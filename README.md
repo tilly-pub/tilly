@@ -6,10 +6,38 @@ CLI for easily creating Today I Learned posts.
 ## Installation
 
 ```
+uv venv .venv
+source .venv/bin/activate
 uv pip install tilly
 ```
 
 ## Usage
+
+Create a repo (or clone a repo from github):
+
+```
+git init
+```
+
+Add a TIL:
+
+```
+mkdir example # this will be the topic of your TIL.
+echo "# My first TIL with tilly" > example/first-til.md
+```
+
+Commit your work:
+
+```
+git add .
+git commit -m "adding first til"
+```
+
+Build the local `tils.db`:
+
+```
+tilly build
+```
 
 ```
 til hello
