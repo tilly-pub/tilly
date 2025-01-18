@@ -8,7 +8,7 @@ with open('requirements.txt', 'r') as f:
 
 setuptools.setup(
     name="tilly",
-    version="0.0.2",
+    version="0.0.5",
     author="Ronald Luitwieler",
     author_email="ronald.luitwieler@gmail.com",
     description="A cli for tracking Things I Learned (TIL)",
@@ -16,6 +16,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/tilly-pub/tilly",
     packages=setuptools.find_packages(),
+    include_package_data=True,
     install_requires=requirements,
     entry_points={
         "console_scripts": [

@@ -18,7 +18,7 @@ from asgiref.sync import async_to_sync
 
 import click
 from click import echo
-from .plugins import plugin_manager
+from .plugin import plugin_manager
 from .utils import get_app_dir
 
 root = pathlib.Path.cwd()
@@ -53,16 +53,16 @@ def build():
     build_database(root)
 
 # options shared by multiple commands
-template_dir_option = click.option(
-    '--template-dir',
+template_folder_option = click.option(
+    '--template-folder',
     type=click.Path(exists=True, file_okay=False, dir_okay=True),
     help='Override the default template directory.')
 
 
 @cli.command(name="serve")
 @click.option("static", "-s", "--static", is_flag=True, help="Serve static files.")
-@template_dir_option
-def serve(template_dir, static):
+@template_folder_option
+def serve(template_folder, static):
     """Serve tils.db using datasette or the generated static files."""
     if static:
         os.chdir(static_folder())
@@ -73,12 +73,12 @@ def serve(template_dir, static):
         httpd.serve_forever()
     else:
         add_config_to_env()
-        serve_datasette(template_dir)
+        serve_datasette(template_folder)
 
 
 @cli.command(name="gen-static")
-@template_dir_option
-def gen_static(template_dir):
+@template_folder_option
+def gen_static(template_folder):
     """Generate static site from tils.db using datasette."""
     # disable search
     os.environ['TILLY_ENABLE_SEARCH'] = 'False'
@@ -91,7 +91,7 @@ def gen_static(template_dir):
         ['/all'] +
         [f'/{row["topic"]}' for row in db.query("SELECT DISTINCT topic FROM til")]
     )
-    pages = get(urls=urls, template_dir=template_dir)
+    pages = get(urls=urls, template_folder=template_folder)
     write_html(pages)
     write_static()
 
@@ -106,6 +106,7 @@ def copy():
 @click.option("url", "-u", "--url", help="The github repo https url.")
 @click.option("google_analytics", "-g", "--google-analytics", help="Your Google Analytics id.")
 @click.option("output_folder", "-o", "--output-folder", help="The output folder for the static site.")
+# @click.option("template_folder", "-t", "--template-folder", help="Custom templates folder.")
 def config(local_config, url, google_analytics, output_folder="_static"):
     """List config."""
 
@@ -130,27 +131,27 @@ def config(local_config, url, google_analytics, output_folder="_static"):
     print(json.dumps(config, indent=4, default=str))
     return config
 
-def datasette(template_dir=None):
-    script_dir = pathlib.Path(__file__).parent.parent
-    template_dir = template_dir or script_dir / "templates"
+def datasette(template_folder=None):
+    script_dir = pathlib.Path(__file__).parent.parent / "tilly"
+    template_folder = template_folder or script_dir / "templates"
 
     return Datasette(
         files=["tils.db"],
         static_mounts=[("static", script_dir / "static")],
         plugins_dir=script_dir / "plugins",
-        template_dir=template_dir,
+        template_dir=template_folder,
     )
 
-def serve_datasette(template_dir=None):
-    ds = datasette(template_dir=template_dir)
+def serve_datasette(template_folder=None):
+    ds = datasette(template_folder=template_folder)
 
     # Get the ASGI application and serve it
     app = ds.app()
     uvicorn.run(app, host="localhost", port=8001)
 
 @async_to_sync
-async def get(urls=None, template_dir=None):
-    ds = datasette(template_dir)
+async def get(urls=None, template_folder=None):
+    ds = datasette(template_folder)
     await ds.invoke_startup()
 
     pages = []
@@ -206,7 +207,7 @@ def write_html(pages):
         path.write_text(page["html"])
 
 def write_static():
-    script_dir = pathlib.Path(__file__).parent.parent
+    script_dir = pathlib.Path(__file__).parent.parent / "tilly"
     src = script_dir / "static"
     dst = root / static_folder()
 
@@ -215,8 +216,8 @@ def write_static():
     shutil.copytree(src, os.path.join(dst, os.path.basename(src)), dirs_exist_ok=True)
 
 
-def copy_templates(template_dir="templates"):
-    script_dir = pathlib.Path(__file__).parent.parent
+def copy_templates(template_folder="templates"):
+    script_dir = pathlib.Path(__file__).parent.parent / "tilly"
     src = script_dir / "templates"
     dst = root
 

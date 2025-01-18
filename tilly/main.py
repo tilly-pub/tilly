@@ -1,5 +1,5 @@
 from .cli import cli
-from .plugins import plugin_manager
+from .plugin import plugin_manager
 
 # Import built-in plugins or commands
 import tilly.commands.hello

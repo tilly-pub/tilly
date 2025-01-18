@@ -1,5 +1,5 @@
 from click import echo
-from ..plugins import hookimpl
+from ..plugin import hookimpl
 
 # Define a hook implementation for the TIL CLI
 @hookimpl
