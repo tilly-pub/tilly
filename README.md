@@ -1,6 +1,8 @@
 # tilly
 
-CLI for easily creating Today I Learned posts.
+CLI for easily creating Today I Learned posts, inspired by [Simon Willison](https://til.simonwillison.net).
+
+Check this [tilly-pub.github.io](https://tilly-pub.github.io) website that was genereated using tilly :)
 
 
 ## Installation
