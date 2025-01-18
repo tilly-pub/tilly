@@ -8,7 +8,7 @@ with open('requirements.txt', 'r') as f:
 
 setuptools.setup(
     name="tilly",
-    version="0.0.5",
+    version="0.0.5a0",
     author="Ronald Luitwieler",
     author_email="ronald.luitwieler@gmail.com",
     description="A cli for tracking Things I Learned (TIL)",

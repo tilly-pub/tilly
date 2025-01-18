@@ -23,6 +23,27 @@ $ tilly hello
 Hello from the TIL CLI!
 ```
 
+## Customize the default templates
+
+Your can overwrite the default templates by first making a copy of the default templates:
+
+```
+tilly copy-templates
+```
+
+Change the templates to your liking, then generate your static site:
+
+```
+tilly gen-static --template-dir templates
+```
+
+Customized templates can also be served locally:
+
+```
+tilly serve --template-dir templates
+```
+
+
 ## Creating plugins
 
 TODO
