@@ -39,17 +39,28 @@ Build the local `tils.db`:
 tilly build
 ```
 
-```
-til hello
-Hello from the TIL CLI!
-```
-
-or
+Serve you tils locally:
 
 ```
-$ tilly hello
-Hello from the TIL CLI!
+tilly serve
 ```
+
+Generate a static site in the docs folder:
+
+```
+tilly config -l --output-folder docs
+tilly gen-static
+```
+
+The static site can also be served locally:
+
+```
+tilly serve --static
+```
+
+You can now publish your static site to [Github](https://pages.github.com).
+Don't forget to configure the source folder `docs` in your repository's GitHub Pages settings.
+
 
 ## Customize the default templates
 
