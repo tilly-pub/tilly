@@ -110,11 +110,9 @@ tilly serve --template-dir templates
 
 
 
-## Creating plugins
 
-TODO
+# Development, building and publishing
 
-## Development, building and publishing
 
 ```
 uv venv .venv --python=3.11
@@ -124,3 +122,15 @@ uv pip install -r requirements-dev.txt
 ./build.sh
 ./publish.sh
 ```
+
+## TODO
+
+- add search to the static site
+- create plugin for generating sitemaps
+- add related article links using vector embeddings
+- it should be possible to store the template folder in the config
+
+## DONE
+
+- add tests
+- update `README.md` with latest `tilly` cli commands/options (`python update_readme.py`)
