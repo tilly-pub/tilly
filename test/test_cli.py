@@ -4,6 +4,21 @@ import os
 import tempfile
 import shutil
 import pathlib
+import filecmp
+
+def are_dirs_equal(dir1, dir2):
+    """
+    Compare two directories recursively to check if they contain the same files with the same content.
+    """
+    dcmp = filecmp.dircmp(dir1, dir2)
+    if dcmp.left_only or dcmp.right_only or dcmp.diff_files:
+        return False
+    for common_dir in dcmp.common_dirs:
+        new_dir1 = os.path.join(dir1, common_dir)
+        new_dir2 = os.path.join(dir2, common_dir)
+        if not are_dirs_equal(new_dir1, new_dir2):
+            return False
+    return True
 
 class TestGitAndTillyCommands(unittest.TestCase):
 
@@ -25,11 +40,13 @@ git init
 mkdir example
 echo "# My first TIL with tilly" > example/first-til.md
 git add .
-git commit -m "adding first til"
+# commit with a fixed date
+GIT_AUTHOR_DATE="2024-07-07T12:00:00Z" GIT_COMMITTER_DATE="2024-07-07T12:00:00Z" git commit -m "adding first til"
 uv venv .venv
 source .venv/bin/activate
 uv pip install -e {self.tilly_dir}
 tilly build
+tilly gen-static
 """
 
         with open("setup_til.sh", "w") as f:
@@ -62,6 +79,12 @@ tilly build
         # Check if tils.db was creatd
         self.assertTrue(os.path.isfile("tils.db"))
 
+        # check if generated html is equal to fixtures
+        static_files_folder = pathlib.Path(self.test_dir) / "_static"
+        fixtures_folder = self.tilly_dir / "test" / "fixtures"
+        # update fixtures:
+        # shutil.copytree(static_files_folder, fixtures_folder, dirs_exist_ok=True)
+        self.assertTrue(are_dirs_equal(static_files_folder, fixtures_folder), "Directories do not match")
 
 if __name__ == '__main__':
     unittest.main()
