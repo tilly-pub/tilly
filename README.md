@@ -132,5 +132,6 @@ uv pip install -r requirements-dev.txt
 
 ## DONE
 
+- example github actions workflow for publishing [tilly static pages](https://tilly-pub.github.io/tilly/github-actions-workflow/)
 - add tests
 - update `README.md` with latest `tilly` cli commands/options (`python update_readme.py`)
