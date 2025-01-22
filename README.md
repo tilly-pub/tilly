@@ -1,8 +1,8 @@
-# tilly
+# Tilly
 
 CLI for easily creating Today I Learned posts, inspired by [Simon Willison](https://til.simonwillison.net).
 
-Check this [tilly-pub.github.io](https://tilly-pub.github.io) website that was genereated using tilly :)
+Check this [tilly-pub.github.io](https://tilly-pub.github.io) website that was genereated using Tilly :)
 
 
 ## Installation
@@ -108,7 +108,13 @@ Customized templates can also be served locally:
 tilly serve --template-dir templates
 ```
 
+## Tilly plugins
 
+Tilly's plugin system allows additional features to be implemented as Python code which can be wrapped up in a separate Python package. The underlying mechanism uses [pluggy](https://pluggy.readthedocs.io/en/stable/).
+
+### Available plugins
+
+- [tilly-sitemap](https://github.com/tilly-pub/tilly-sitemap): Generate `robots.txt` and `sitemap.xml` for [tilly](https://github.com/tilly-pub/tilly) sites.
 
 
 # Development, building and publishing
@@ -126,12 +132,12 @@ uv pip install -r requirements-dev.txt
 ## TODO
 
 - add search to the static site
-- create plugin for generating sitemaps
 - add related article links using vector embeddings
 - it should be possible to store the template folder in the config
 
 ## DONE
 
+- create plugin for generating sitemaps
 - example github actions workflow for publishing [tilly static pages](https://tilly-pub.github.io/tilly/github-actions-workflow/)
 - add tests
 - update `README.md` with latest `tilly` cli commands/options (`python update_readme.py`)
