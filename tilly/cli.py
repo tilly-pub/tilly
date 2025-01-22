@@ -19,7 +19,7 @@ from asgiref.sync import async_to_sync
 import click
 from click import echo
 from .plugin import plugin_manager
-from .utils import get_app_dir, load_config, local_config_file, add_config_to_env
+from .utils import get_app_dir, load_config, local_config_file, add_config_to_env, static_folder
 
 root = pathlib.Path.cwd()
 
@@ -171,9 +171,6 @@ async def get(urls=None, template_folder=None):
 
 
 
-def static_folder():
-    config = load_config(local_config=True)
-    return config.get("TILLY_OUTPUT_FOLDER", "_static")
 
 def write_html(pages):
     static_root = root / static_folder()

@@ -4,6 +4,10 @@ import pathlib
 
 import click
 
+def static_folder():
+    config = load_config(local_config=True)
+    return config.get("TILLY_OUTPUT_FOLDER", "_static")
+
 def get_app_dir():
     path = pathlib.Path(click.get_app_dir("tilly"))
     path.mkdir(exist_ok=True, parents=True)
