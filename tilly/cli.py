@@ -19,7 +19,7 @@ from asgiref.sync import async_to_sync
 import click
 from click import echo
 from .plugin import plugin_manager
-from .utils import get_app_dir
+from .utils import get_app_dir, load_config, local_config_file, add_config_to_env
 
 root = pathlib.Path.cwd()
 
@@ -104,10 +104,11 @@ def copy():
 @cli.command(name="config")
 @click.option("local_config", "-l", "--local", is_flag=True, help="Local config.")
 @click.option("url", "-u", "--url", help="The github repo https url.")
+@click.option("base_url", "-b", "--base-url", help="The base url of the static site.")
 @click.option("google_analytics", "-g", "--google-analytics", help="Your Google Analytics id.")
 @click.option("output_folder", "-o", "--output-folder", help="The output folder for the static site.")
 # @click.option("template_folder", "-t", "--template-folder", help="Custom templates folder.")
-def config(local_config, url, google_analytics, output_folder="_static"):
+def config(local_config, url, base_url, google_analytics, output_folder="_static"):
     """List config."""
 
     config = {}
@@ -118,6 +119,8 @@ def config(local_config, url, google_analytics, output_folder="_static"):
         # Update config with provided parameters
         if url:
             config['TILLY_GITHUB_URL'] = url
+        if base_url:
+            config['TILLY_BASE_URL'] = base_url
         if google_analytics:
             config['TILLY_GOOGLE_ANALYTICS'] = google_analytics
         if output_folder:
@@ -166,23 +169,7 @@ async def get(urls=None, template_folder=None):
 
     return pages
 
-def add_config_to_env():
-    """ASdd config to environment."""
-    config = load_config(local_config=True)
-    os.environ = {**os.environ, **config}
 
-def global_config_file():
-    return get_app_dir() / "config.json"
-
-def local_config_file():
-    return root / "config.json"
-
-def load_config(global_config=None, local_config=None):
-    if global_config:
-        return json.loads(global_config_file().read_text()) if global_config_file().exists() else {}
-
-    if local_config:
-        return json.loads(local_config_file().read_text()) if local_config_file().exists() else {}
 
 def static_folder():
     config = load_config(local_config=True)
