@@ -116,6 +116,17 @@ Tilly's plugin system allows additional features to be implemented as Python cod
 
 - [tilly-sitemap](https://github.com/tilly-pub/tilly-sitemap): Generate `robots.txt` and `sitemap.xml` for [tilly](https://github.com/tilly-pub/tilly) sites.
 
+### Creating your own Tilly plugin
+
+You can easily create your own plugin by running the following command:
+
+```
+uvx cookiecutter gh:tilly-pub/tilly-plugin
+```
+
+This command runs cookiecutter and will use our [`tilly-plugin`](https://github.com/tilly-pub/tilly-plugin) cookiecutter to setup a new project.
+
+
 
 # Development, building and publishing
 
