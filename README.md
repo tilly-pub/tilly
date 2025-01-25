@@ -133,6 +133,7 @@ uv pip install -r requirements-dev.txt
 
 - add search to the static site
 - add related article links using vector embeddings
+- support TILs with multiple categories
 - it should be possible to store the template folder in the config
 
 ## DONE
