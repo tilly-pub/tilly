@@ -147,6 +147,7 @@ uv pip install -r requirements-dev.txt
 - add related article links using vector embeddings
 - support TILs with multiple categories
 - it should be possible to store the template folder in the config
+- add rss feed
 
 ## DONE
 
