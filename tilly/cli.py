@@ -3,6 +3,7 @@ import json
 import pathlib
 import shutil
 import time
+import asyncio
 
 from datetime import timezone
 
@@ -20,6 +21,7 @@ import click
 from click import echo
 from .plugin import plugin_manager
 from .utils import get_app_dir, load_config, local_config_file, add_config_to_env, static_folder
+from .search.pagefind import index_site
 
 root = pathlib.Path.cwd()
 
@@ -94,6 +96,7 @@ def gen_static(template_folder):
     pages = get(urls=urls, template_folder=template_folder)
     write_html(pages)
     write_static()
+    add_search_index()
 
 @cli.command(name="copy-templates")
 def copy():
@@ -198,6 +201,12 @@ def write_static():
     echo(dst / "static")
 
     shutil.copytree(src, os.path.join(dst, os.path.basename(src)), dirs_exist_ok=True)
+
+def add_search_index():
+    src = root / static_folder()
+    dst = root / static_folder() / "pagefind"
+
+    asyncio.run(index_site(site=str(src), output_path=str(dst)))
 
 
 def copy_templates(template_folder="templates"):
