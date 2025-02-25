@@ -68,10 +68,10 @@ def prepare_connection(conn):
 
 @hookimpl
 def prepare_jinja2_environment(env):
-    if os.environ.get("TILLY_ENABLE_SEARCH", "True") == "True":
-        env.globals['enable_search'] = True
+    if os.environ.get("TILLY_SEARCH", "datasette") == "static":
+        env.globals['search_type'] = 'static'
     else:
-        env.globals['enable_search'] = False
+        env.globals['search_type'] = 'datasette'
 
     # tilly config to env.globals
     tilly_config_vars = {k: v for k,v in os.environ.items() if k.startswith("TILLY_")}

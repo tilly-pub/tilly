@@ -83,7 +83,7 @@ def serve(template_folder, static):
 def gen_static(template_folder):
     """Generate static site from tils.db using datasette."""
     # disable search
-    os.environ['TILLY_ENABLE_SEARCH'] = 'False'
+    os.environ['TILLY_SEARCH'] = 'static'
 
     add_config_to_env()
     db = database(root)
