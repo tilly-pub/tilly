@@ -142,7 +142,6 @@ uv pip install -r requirements-dev.txt
 
 ## TODO
 
-- add search to the static site
 - document tilly-plugin creation
 - add related article links using vector embeddings
 - support TILs with multiple categories
@@ -151,6 +150,7 @@ uv pip install -r requirements-dev.txt
 
 ## DONE
 
+- add search to the static site
 - created cookiecutter tilly-plugin repo
 - create plugin for generating sitemaps
 - example github actions workflow for publishing [tilly static pages](https://tilly-pub.github.io/tilly/github-actions-workflow/)
