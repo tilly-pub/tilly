@@ -150,6 +150,7 @@ uv pip install -r requirements-dev.txt
 
 ## DONE
 
+- render snippets in your pages, check [here](https://github.com/tilly-pub/tilly-pub.github.io/tree/main/_snippets) and [here](https://github.com/tilly-pub/tilly-pub.github.io/blob/34528f7a42ca0d3f05730de35d68e9c3bd039d0e/templates/index.html#L49) for an example.
 - add search to the static site
 - created cookiecutter tilly-plugin repo
 - create plugin for generating sitemaps
