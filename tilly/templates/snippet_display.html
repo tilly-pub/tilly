@@ -1,0 +1,8 @@
+{% set snippets = sql("""
+    select * from snippets where path = :snippet_path
+""", {"snippet_path": snippet_path}, database="tils") %}
+{% if snippets %}
+    {% set snippet = snippets[0] %}
+    <h1>{{ snippet.title }}</h1>
+    {{ snippet.html|safe }}
+{% endif %}

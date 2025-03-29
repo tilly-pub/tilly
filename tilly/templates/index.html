@@ -45,9 +45,13 @@ h1 {
 {% endblock %}
 
 {% block body %}
-{% set til_count = sql("select count(*) from TIL", database="tils")[0][0] %}
-<h1>TIL</h1>
 
+{% set snippet_path = '_snippets_index.md' %}
+{% include 'snippet_display.html' %}
+
+{% set til_count = sql("select count(*) from TIL", database="tils")[0][0] %}
+
+<h2>Search</h2>
 
 {% if search_type == "static" %}
     <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
@@ -67,7 +71,7 @@ h1 {
     </form>
 {% endif %}
 
-<p><strong>Browse by topic:</strong>
+<h2>Browse by topic</h2>
 {% for row in sql("select topic, count(*) as num_tils from til group by topic order by topic", database="tils") %}
   <a title="{{ row.num_tils }} TIL{{ "s" if row.num_tils > 1 else "" }}" href="/{{ row.topic }}">{{ row.topic }}</a> {{ row.num_tils }}{% if not loop.last %} &middot;{% endif %}
 {% endfor %}
