@@ -334,8 +334,38 @@ def _til_table(db, all_times, config):
     )
 
 def _snippets_table(db, all_times, config):
+    # Create the table explicitly with the schema we want
+    if "snippets" not in db.table_names():
+        # Create empty table with the desired schema
+        db.create_table(
+            "snippets",
+            {
+                "path": str,
+                "slug": str,
+                "topics": str,
+                "title": str,
+                "url": str,
+                "body": str,
+                "html": str,
+                "summary": str,
+                "created": str,
+                "created_utc": str,
+                "updated": str,
+                "updated_utc": str
+            },
+            pk="path"
+        )
+        print("Created empty snippets table")
+
+    # Reference to the table
     table = db.table("snippets", pk="path")
+
+    # Count of processed snippets
+    snippets_count = 0
+
+    # Process any existing snippet files
     for filepath in root.glob("_snippets*/*.md"):
+        snippets_count += 1
         print(filepath)
         # Read the entire file content
         content = filepath.read_text()

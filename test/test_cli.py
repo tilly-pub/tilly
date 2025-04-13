@@ -42,7 +42,7 @@ echo "# My first TIL with tilly" > example/first-til.md
 git add .
 # commit with a fixed date
 GIT_AUTHOR_DATE="2024-07-07T12:00:00Z" GIT_COMMITTER_DATE="2024-07-07T12:00:00Z" git commit -m "adding first til"
-uv venv .venv
+uv venv .venv --python=python3.11.7
 source .venv/bin/activate
 uv pip install -e {self.tilly_dir}
 tilly build
@@ -56,7 +56,7 @@ tilly gen-static
         subprocess.run(["chmod", "+x", "setup_til.sh"], check=True)
 
         # Run the script
-        subprocess.run(["./setup_til.sh"], check=True, capture_output=True, text=True)
+        subprocess.run(["./setup_til.sh"], check=True, capture_output=False, text=True)
 
         # Assertions to check if the script did what it was supposed to
         # Check if git repo was initialized
