@@ -28,21 +28,6 @@ input[type=submit] {
     border-radius: .25rem;
     margin-left: 0.3em;
 }
-h1 {
-    font-family: Georgia, 'Times New Roman', Times, serif;
-}
-.topic {
-    background-color: #ccc;
-    padding: 3px;
-    border: 1px solid #777;
-    font-size: 0.65em;
-    position: relative;
-    top: -1px;
-}
-.topic a {
-    text-decoration: none;
-    color: black;
-}
 </style>
 
 <style>
@@ -71,6 +56,7 @@ h1 {
 .topic {
     background-color: #ccc;
     padding: 3px;
+    margin-right: 3px;
     border: 1px solid #777;
     font-size: 0.65em;
     position: relative;
@@ -181,22 +167,43 @@ div#ft a {
 <section class="body">
 
 
-<h1>TIL</h1>
 
 
 
 
-<p><strong>Browse by topic:</strong>
 
-  <a title="1 TIL" href="/example">example</a> 1
 
+<h2>Search</h2>
+
+
+    <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+    <script src="/pagefind/pagefind-ui.js"></script>
+    <div id="search"></div>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true });
+        });
+    </script>
+
+
+<h2>Browse by topic</h2>
+<p>
+  <a title="1 TIL on example" href="/example">example</a> 1
 </p>
 
 <h2>Recent TILs</h2>
 
 
-    <h3><span class="topic"><a href="/example">example</a></span> <a href="/example/first-til">My first TIL with tilly</a> - 2024-07-07</h3>
+    <h3><a href="/example/first-til">My first TIL with tilly</a> - 2024-07-07</h3>
     None
+
+    
+        <span class="topic">
+            <a href="/example">
+                example
+            </a>
+        </span>
+    
 
 
 <p><a href="/all">Browse all 1 TILs</a></p>
@@ -205,8 +212,9 @@ div#ft a {
 </section>
 <div id="ft">
     <ul>
-      <li>Built with <a href="https://tilly-pub.github.io/">tilly</a></li>
+      <li>Built with <a href="https://tilly-pub.github.io/">Tilly</a></li>
       <li>©</li>
+      <li><a href="https://github.com/tilly-pub/tilly">Contribute</a></li>
     </ul>
 </div>
 </body>
