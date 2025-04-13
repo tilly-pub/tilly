@@ -87,11 +87,23 @@ def gen_static(template_folder):
 
     add_config_to_env()
     db = database(root)
+    # Get all distinct topics from the 'topics' column using a simple split approach
+    all_topics = set()
+
+    # Extract topics by splitting the comma-separated values
+    for row in db.query("SELECT topics FROM til WHERE topics IS NOT NULL"):
+        if row['topics']:
+            topics = [t.strip() for t in row['topics'].split(',')]
+            for topic in topics:
+                if topic:
+                    all_topics.add(topic)
+
     urls = (
         ['/'] +
-        [f'/{row["topic"]}/{row["slug"]}' for row in db.query("SELECT topic, slug FROM til")] +
+        # For URLs, use the first topic in the topics list for each document
+        [f'/{row["topics"].split(",")[0]}/{row["slug"]}' for row in db.query("SELECT topics, slug FROM til")] +
         ['/all'] +
-        [f'/{row["topic"]}' for row in db.query("SELECT DISTINCT topic FROM til")]
+        [f'/{topic}' for topic in all_topics]
     )
     pages = get(urls=urls, template_folder=template_folder)
     write_html(pages)
@@ -240,12 +252,51 @@ def _til_table(db, all_times, config):
     table = db.table("til", pk="path")
     for filepath in root.glob(f"[!_]*/*.md"):
         print(filepath)
-        fp = filepath.open()
-        title = fp.readline().lstrip("#").strip()
-        body = fp.read().strip()
+        # Read the entire file content
+        content = filepath.read_text()
+
+        # Check for frontmatter
+        frontmatter = {}
+        if content.startswith('---'):
+            # Extract frontmatter
+            _, frontmatter_text, remaining_content = content.split('---', 2)
+            try:
+                # Try to parse the frontmatter as YAML
+                import yaml
+                frontmatter = yaml.safe_load(frontmatter_text.strip())
+                # Get the first line of the remaining content as title
+                title_line = remaining_content.strip().split('\n', 1)[0]
+                title = title_line.lstrip('#').strip()
+                body = remaining_content.strip()
+            except Exception as e:
+                print(f"Error parsing frontmatter in {filepath}: {e}")
+                # Fall back to original parsing method
+                lines = content.split('\n')
+                title = lines[0].lstrip('#').strip()
+                body = '\n'.join(lines[1:]).strip()
+        else:
+            # No frontmatter, use original parsing method
+            lines = content.split('\n')
+            title = lines[0].lstrip('#').strip()
+            body = '\n'.join(lines[1:]).strip()
+
         path = str(filepath.relative_to(root))
         slug = filepath.stem
-        topic = path.split("/")[0]
+
+        # Get path-based topic (from directory structure)
+        path_topic = path.split("/")[0]
+
+        # Get frontmatter topics if available
+        frontmatter_topics = frontmatter.get('topics', [])
+        if isinstance(frontmatter_topics, str):
+            frontmatter_topics = [frontmatter_topics]
+
+        # Combine topics with path_topic always first
+        topics = [path_topic]
+        for topic in frontmatter_topics:
+            if topic != path_topic and topic not in topics:
+                topics.append(topic)
+
         url = config.get("url", "") + "{}".format(path)
         # Do we need to render the markdown?
         path_slug = path.replace("/", "_")
@@ -259,7 +310,7 @@ def _til_table(db, all_times, config):
         record = {
             "path": path_slug,
             "slug": slug,
-            "topic": topic,
+            "topics": ",".join(topics),
             "title": title,
             "url": url,
             "body": body,
@@ -279,18 +330,58 @@ def _til_table(db, all_times, config):
 
     # enable full text search
     table.enable_fts(
-        ["title", "body"], tokenize="porter", create_triggers=True, replace=True
+        ["title", "body", "topics"], tokenize="porter", create_triggers=True, replace=True
     )
 
 def _snippets_table(db, all_times, config):
     table = db.table("snippets", pk="path")
     for filepath in root.glob("_snippets*/*.md"):
         print(filepath)
-        fp = filepath.open()
-        title = fp.readline().lstrip("#").strip()
-        body = fp.read().strip()
+        # Read the entire file content
+        content = filepath.read_text()
+
+        # Check for frontmatter
+        frontmatter = {}
+        if content.startswith('---'):
+            # Extract frontmatter
+            _, frontmatter_text, remaining_content = content.split('---', 2)
+            try:
+                # Try to parse the frontmatter as YAML
+                import yaml
+                frontmatter = yaml.safe_load(frontmatter_text.strip())
+                # Get the first line of the remaining content as title
+                title_line = remaining_content.strip().split('\n', 1)[0]
+                title = title_line.lstrip('#').strip()
+                body = remaining_content.strip()
+            except Exception as e:
+                print(f"Error parsing frontmatter in {filepath}: {e}")
+                # Fall back to original parsing method
+                lines = content.split('\n')
+                title = lines[0].lstrip('#').strip()
+                body = '\n'.join(lines[1:]).strip()
+        else:
+            # No frontmatter, use original parsing method
+            lines = content.split('\n')
+            title = lines[0].lstrip('#').strip()
+            body = '\n'.join(lines[1:]).strip()
+
         path = str(filepath.relative_to(root))
         slug = filepath.stem
+
+        # Get path-based topic (from directory structure)
+        path_topic = path.split("/")[0]
+
+        # Get frontmatter topics if available
+        frontmatter_topics = frontmatter.get('topics', [])
+        if isinstance(frontmatter_topics, str):
+            frontmatter_topics = [frontmatter_topics]
+
+        # Combine topics with path_topic always first
+        topics = [path_topic]
+        for topic in frontmatter_topics:
+            if topic != path_topic and topic not in topics:
+                topics.append(topic)
+
         url = config.get("url", "") + "{}".format(path)
         # Do we need to render the markdown?
         path_slug = path.replace("/", "_")
@@ -304,7 +395,7 @@ def _snippets_table(db, all_times, config):
         record = {
             "path": path_slug,
             "slug": slug,
-            "topic": path.split("/")[0],
+            "topics": ",".join(topics),
             "title": title,
             "url": url,
             "body": body,
@@ -324,7 +415,7 @@ def _snippets_table(db, all_times, config):
 
     # enable full text search
     table.enable_fts(
-        ["title", "body"], tokenize="porter", create_triggers=True, replace=True
+        ["title", "body", "topics"], tokenize="porter", create_triggers=True, replace=True
     )
 
 def github_markdown(body, path):

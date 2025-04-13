@@ -26,21 +26,6 @@ input[type=submit] {
     border-radius: .25rem;
     margin-left: 0.3em;
 }
-h1 {
-    font-family: Georgia, 'Times New Roman', Times, serif;
-}
-.topic {
-    background-color: #ccc;
-    padding: 3px;
-    border: 1px solid #777;
-    font-size: 0.65em;
-    position: relative;
-    top: -1px;
-}
-.topic a {
-    text-decoration: none;
-    color: black;
-}
 </style>
 {% endblock %}
 
@@ -72,16 +57,37 @@ h1 {
 {% endif %}
 
 <h2>Browse by topic</h2>
-{% for row in sql("select topic, count(*) as num_tils from til group by topic order by topic", database="tils") %}
-  <a title="{{ row.num_tils }} TIL{{ "s" if row.num_tils > 1 else "" }}" href="/{{ row.topic }}">{{ row.topic }}</a> {{ row.num_tils }}{% if not loop.last %} &middot;{% endif %}
-{% endfor %}
+<p>
+{%- set unique_topics = {} %}
+{%- for topic_row in sql("SELECT DISTINCT topics FROM til", database="tils") %}
+  {%- if topic_row.topics %}
+    {%- for topic in topic_row.topics.split(',') %}
+      {%- if topic.strip() and not unique_topics.get(topic.strip()) %}
+        {%- set count = sql("SELECT COUNT(*) as count FROM til WHERE topics LIKE '%" + topic.strip() + "%'", database="tils")[0].count %}
+        {%- if unique_topics.update({topic.strip(): count}) -%}{%- endif %}
+      {%- endif %}
+    {%- endfor %}
+  {%- endif %}
+{%- endfor %}
+
+{%- for topic in unique_topics.keys()|sort %}
+  <a title="{{ unique_topics[topic] }} TIL{{ 's' if unique_topics[topic] > 1 else '' }} on {{ topic }}" href="/{{ topic }}">{{ topic }}</a> {{ unique_topics[topic] }}{% if not loop.last %} &middot; {% endif %}
+{%- endfor %}
 </p>
 
 <h2>Recent TILs</h2>
 
 {% for til in sql("select * from til order by created_utc desc limit 30", database="tils") %}
-    <h3><span class="topic"><a href="/{{ til.topic }}">{{ til.topic }}</a></span> <a href="/{{ til.topic }}/{{ til.slug }}">{{ til.title }}</a> - {{ til.created[:10] }}</h3>
+    <h3><a href="/{{ til.topics.split(',')[0] }}/{{ til.slug }}">{{ til.title }}</a> - {{ til.created[:10] }}</h3>
     {{ first_paragraph(til["html"]).replace("</p>", " &#8230; </p>")|safe }}
+
+    {% for topic in til.topics.split(',') %}
+        <span class="topic">
+            <a href="/{{ topic }}">
+                {{ topic }}
+            </a>
+        </span>
+    {% endfor %}
 {% endfor %}
 
 <p><a href="/all">Browse all {{ til_count }} TILs</a></p>

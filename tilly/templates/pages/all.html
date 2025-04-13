@@ -5,13 +5,26 @@
 {% block body %}
 <h1>all TILs</h1>
 
-{% for row in sql("select topic from til group by topic order by max(created_utc) desc", database="tils") %}
-    <h2>{{ row.topic }}</h2>
-    <ul>
-        {% for til in sql("select * from til where topic = :topic order by created_utc desc", {"topic": row.topic}, database="tils") %}
-            <li><a href="/{{ til.topic }}/{{ til.slug }}">{{ til.title }}</a> - {{ til.created[:10] }}</li>
-        {% endfor %}
-    </ul>
-{% endfor %}
+{% set topics_found = [] %}
 
+{%- for topic_row in sql("SELECT DISTINCT topics FROM til", database="tils") -%}
+  {%- if topic_row.topics -%}
+    {%- for topic in topic_row.topics.split(',') -%}
+      {%- if topic.strip() -%}
+        {%- if topic.strip() not in topics_found -%}
+          {%- set _ = topics_found.append(topic.strip()) -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+{%- endfor %}
+
+{% for topic in topics_found|sort %}
+  <h2>{{ topic }}</h2>
+  <ul>
+    {% for til in sql("SELECT * FROM til WHERE topics LIKE '%" + topic + "%' ORDER BY created_utc DESC", database="tils") %}
+      <li><a href="/{{ til.topics.split(',')[0] }}/{{ til.slug }}">{{ til.title }}</a> - {{ til.created[:10] }}</li>
+    {% endfor %}
+  </ul>
+{% endfor %}
 {% endblock %}

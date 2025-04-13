@@ -140,16 +140,38 @@ uv pip install -r requirements-dev.txt
 ./publish.sh
 ```
 
+## Topics
+
+By default, the topic of a TIL is determined by the directory structure. For example, a file at `python/decorators.md` would have the topic "python".
+
+You can also specify additional topics directly in the markdown file using frontmatter. For example:
+
+```markdown
+---
+topics: ["decorators", "functional-programming"]
+---
+
+# How to use Python decorators
+
+Content of your TIL here...
+```
+
+When using frontmatter topics:
+
+- The directory-based topic will always be the primary topic for URL routing
+- All topics (directory-based and frontmatter) will be searchable
+- The file can still be organized in any directory structure
+
 ## TODO
 
 - document tilly-plugin creation
 - add related article links using vector embeddings
-- support TILs with multiple categories
 - it should be possible to store the template folder in the config
 - add rss feed
 
 ## DONE
 
+- support TILs with multiple categories (via frontmatter)
 - render snippets in your pages, check [here](https://github.com/tilly-pub/tilly-pub.github.io/tree/main/_snippets) and [here](https://github.com/tilly-pub/tilly-pub.github.io/blob/34528f7a42ca0d3f05730de35d68e9c3bd039d0e/templates/index.html#L49) for an example.
 - add search to the static site
 - created cookiecutter tilly-plugin repo

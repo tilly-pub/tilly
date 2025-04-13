@@ -1,8 +1,8 @@
 {% extends "til_base.html" %}
 
 {% set tils = sql("""
-    select * from til where path = :topic || '_' || :slug || '.md'
-""", {"topic": topic, "slug": slug}, database="tils")
+    select * from til where path = :topic || '_' || :slug || '.md' or (topics LIKE :topic_pattern and slug = :slug)
+""", {"topic": topic, "slug": slug, "topic_pattern": '%' + topic + '%'}, database="tils")
 %}
 {% set til = tils[0] %}
 {% if not tils %}

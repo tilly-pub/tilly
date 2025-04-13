@@ -26,7 +26,7 @@ def extra_template_vars(request, datasette):
         path = til["path"]
         sql = """
         select
-          til.topic, til.slug, til.title, til.created
+          til.topics, til.slug, til.title, til.created
         from til
           join similarities on til.path = similarities.other_id
         where similarities.id = :path
