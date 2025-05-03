@@ -20,7 +20,7 @@ from asgiref.sync import async_to_sync
 import click
 from click import echo
 from .plugin import plugin_manager
-from .utils import get_app_dir, load_config, local_config_file, add_config_to_env, static_folder
+from .utils import load_config, local_config_file, add_config_to_env, static_folder
 from .search.pagefind import index_site
 
 root = pathlib.Path.cwd()
@@ -32,6 +32,7 @@ root = pathlib.Path.cwd()
 def cli():
     """TIL (Today I Learned) Command Line Interface."""
     pass
+
 
 # Define a command to list all available plugins
 @cli.command()
@@ -49,16 +50,17 @@ def list_plugins():
     else:
         click.echo("No plugins installed.")
 
+
 @cli.command(name="build")
 def build():
     """Build database tils.db."""
     build_database(root)
 
+
 # options shared by multiple commands
 template_folder_option = click.option(
-    '--template-folder',
-    type=click.Path(exists=True, file_okay=False, dir_okay=True),
-    help='Override the default template directory.')
+    "--template-folder", type=click.Path(exists=True, file_okay=False, dir_okay=True), help="Override the default template directory."
+)
 
 
 @cli.command(name="serve")
@@ -69,7 +71,7 @@ def serve(template_folder, static):
     if static:
         os.chdir(static_folder())
         port = 8080
-        server_address = ('localhost', port)
+        server_address = ("localhost", port)
         httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
         print(f"Starting http server on http://localhost:{port}")
         httpd.serve_forever()
@@ -83,7 +85,7 @@ def serve(template_folder, static):
 def gen_static(template_folder):
     """Generate static site from tils.db using datasette."""
     # disable search
-    os.environ['TILLY_SEARCH'] = 'static'
+    os.environ["TILLY_SEARCH"] = "static"
 
     add_config_to_env()
     db = database(root)
@@ -92,23 +94,25 @@ def gen_static(template_folder):
 
     # Extract topics by splitting the comma-separated values
     for row in db.query("SELECT topics FROM til WHERE topics IS NOT NULL"):
-        if row['topics']:
-            topics = [t.strip() for t in row['topics'].split(',')]
+        if row["topics"]:
+            topics = [t.strip() for t in row["topics"].split(",")]
             for topic in topics:
                 if topic:
                     all_topics.add(topic)
 
     urls = (
-        ['/'] +
+        ["/"]
+        +
         # For URLs, use the first topic in the topics list for each document
-        [f'/{row["topics"].split(",")[0]}/{row["slug"]}' for row in db.query("SELECT topics, slug FROM til")] +
-        ['/all'] +
-        [f'/{topic}' for topic in all_topics]
+        [f'/{row["topics"].split(",")[0]}/{row["slug"]}' for row in db.query("SELECT topics, slug FROM til")]
+        + ["/all"]
+        + [f"/{topic}" for topic in all_topics]
     )
     pages = get(urls=urls, template_folder=template_folder)
     write_html(pages)
     write_static()
     add_search_index()
+
 
 @cli.command(name="copy-templates")
 def copy():
@@ -133,21 +137,22 @@ def config(local_config, url, base_url, google_analytics, output_folder="_static
 
         # Update config with provided parameters
         if url:
-            config['TILLY_GITHUB_URL'] = url
+            config["TILLY_GITHUB_URL"] = url
         if base_url:
-            config['TILLY_BASE_URL'] = base_url
+            config["TILLY_BASE_URL"] = base_url
         if google_analytics:
-            config['TILLY_GOOGLE_ANALYTICS'] = google_analytics
+            config["TILLY_GOOGLE_ANALYTICS"] = google_analytics
         if output_folder:
-            config['TILLY_OUTPUT_FOLDER'] = output_folder
+            config["TILLY_OUTPUT_FOLDER"] = output_folder
 
         # Save the updated config
-        with open(local_config_file(), 'w') as f:
+        with open(local_config_file(), "w") as f:
             json.dump(config, f, indent=4)
 
     # Print the configuration
     print(json.dumps(config, indent=4, default=str))
     return config
+
 
 def datasette(template_folder=None):
     script_dir = pathlib.Path(__file__).parent.parent / "tilly"
@@ -160,12 +165,14 @@ def datasette(template_folder=None):
         template_dir=template_folder,
     )
 
+
 def serve_datasette(template_folder=None):
     ds = datasette(template_folder=template_folder)
 
     # Get the ASGI application and serve it
     app = ds.app()
     uvicorn.run(app, host="localhost", port=8001)
+
 
 @async_to_sync
 async def get(urls=None, template_folder=None):
@@ -183,8 +190,6 @@ async def get(urls=None, template_folder=None):
         pages.append({"url": url, "html": httpx_response.text})
 
     return pages
-
-
 
 
 def write_html(pages):
@@ -205,6 +210,7 @@ def write_html(pages):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(page["html"])
 
+
 def write_static():
     script_dir = pathlib.Path(__file__).parent.parent / "tilly"
     src = script_dir / "static"
@@ -213,6 +219,7 @@ def write_static():
     echo(dst / "static")
 
     shutil.copytree(src, os.path.join(dst, os.path.basename(src)), dirs_exist_ok=True)
+
 
 def add_search_index():
     src = root / static_folder()
@@ -237,8 +244,10 @@ def copy_templates(template_folder="templates"):
         print(f"An error occurred: {e}")
         raise
 
+
 def database(repo_path):
     return sqlite_utils.Database(repo_path / "tils.db")
+
 
 def build_database(repo_path):
     echo(f"build_database {repo_path}")
@@ -247,6 +256,7 @@ def build_database(repo_path):
     db = database(repo_path)
     _til_table(db, all_times, config)
     _snippets_table(db, all_times, config)
+
 
 def _til_table(db, all_times, config):
     table = db.table("til", pk="path")
@@ -257,28 +267,29 @@ def _til_table(db, all_times, config):
 
         # Check for frontmatter
         frontmatter = {}
-        if content.startswith('---'):
+        if content.startswith("---"):
             # Extract frontmatter
-            _, frontmatter_text, remaining_content = content.split('---', 2)
+            _, frontmatter_text, remaining_content = content.split("---", 2)
             try:
                 # Try to parse the frontmatter as YAML
                 import yaml
+
                 frontmatter = yaml.safe_load(frontmatter_text.strip())
                 # Get the first line of the remaining content as title
-                title_line = remaining_content.strip().split('\n', 1)[0]
-                title = title_line.lstrip('#').strip()
+                title_line = remaining_content.strip().split("\n", 1)[0]
+                title = title_line.lstrip("#").strip()
                 body = remaining_content.strip()
             except Exception as e:
                 print(f"Error parsing frontmatter in {filepath}: {e}")
                 # Fall back to original parsing method
-                lines = content.split('\n')
-                title = lines[0].lstrip('#').strip()
-                body = '\n'.join(lines[1:]).strip()
+                lines = content.split("\n")
+                title = lines[0].lstrip("#").strip()
+                body = "\n".join(lines[1:]).strip()
         else:
             # No frontmatter, use original parsing method
-            lines = content.split('\n')
-            title = lines[0].lstrip('#').strip()
-            body = '\n'.join(lines[1:]).strip()
+            lines = content.split("\n")
+            title = lines[0].lstrip("#").strip()
+            body = "\n".join(lines[1:]).strip()
 
         path = str(filepath.relative_to(root))
         slug = filepath.stem
@@ -287,7 +298,7 @@ def _til_table(db, all_times, config):
         path_topic = path.split("/")[0]
 
         # Get frontmatter topics if available
-        frontmatter_topics = frontmatter.get('topics', [])
+        frontmatter_topics = frontmatter.get("topics", [])
         if isinstance(frontmatter_topics, str):
             frontmatter_topics = [frontmatter_topics]
 
@@ -316,22 +327,18 @@ def _til_table(db, all_times, config):
             "body": body,
         }
         if (body != previous_body) or not previous_html:
-
             record["html"] = github_markdown(body, path)
             print("Rendered HTML for {}".format(path))
 
         # Populate summary
-        record["summary"] = first_paragraph_text_only(
-            record.get("html") or previous_html or ""
-        )
+        record["summary"] = first_paragraph_text_only(record.get("html") or previous_html or "")
         record.update(all_times[path])
         with db.conn:
             table.upsert(record, alter=True)
 
     # enable full text search
-    table.enable_fts(
-        ["title", "body", "topics"], tokenize="porter", create_triggers=True, replace=True
-    )
+    table.enable_fts(["title", "body", "topics"], tokenize="porter", create_triggers=True, replace=True)
+
 
 def _snippets_table(db, all_times, config):
     # Create the table explicitly with the schema we want
@@ -351,9 +358,9 @@ def _snippets_table(db, all_times, config):
                 "created": str,
                 "created_utc": str,
                 "updated": str,
-                "updated_utc": str
+                "updated_utc": str,
             },
-            pk="path"
+            pk="path",
         )
         print("Created empty snippets table")
 
@@ -372,28 +379,29 @@ def _snippets_table(db, all_times, config):
 
         # Check for frontmatter
         frontmatter = {}
-        if content.startswith('---'):
+        if content.startswith("---"):
             # Extract frontmatter
-            _, frontmatter_text, remaining_content = content.split('---', 2)
+            _, frontmatter_text, remaining_content = content.split("---", 2)
             try:
                 # Try to parse the frontmatter as YAML
                 import yaml
+
                 frontmatter = yaml.safe_load(frontmatter_text.strip())
                 # Get the first line of the remaining content as title
-                title_line = remaining_content.strip().split('\n', 1)[0]
-                title = title_line.lstrip('#').strip()
+                title_line = remaining_content.strip().split("\n", 1)[0]
+                title = title_line.lstrip("#").strip()
                 body = remaining_content.strip()
             except Exception as e:
                 print(f"Error parsing frontmatter in {filepath}: {e}")
                 # Fall back to original parsing method
-                lines = content.split('\n')
-                title = lines[0].lstrip('#').strip()
-                body = '\n'.join(lines[1:]).strip()
+                lines = content.split("\n")
+                title = lines[0].lstrip("#").strip()
+                body = "\n".join(lines[1:]).strip()
         else:
             # No frontmatter, use original parsing method
-            lines = content.split('\n')
-            title = lines[0].lstrip('#').strip()
-            body = '\n'.join(lines[1:]).strip()
+            lines = content.split("\n")
+            title = lines[0].lstrip("#").strip()
+            body = "\n".join(lines[1:]).strip()
 
         path = str(filepath.relative_to(root))
         slug = filepath.stem
@@ -402,7 +410,7 @@ def _snippets_table(db, all_times, config):
         path_topic = path.split("/")[0]
 
         # Get frontmatter topics if available
-        frontmatter_topics = frontmatter.get('topics', [])
+        frontmatter_topics = frontmatter.get("topics", [])
         if isinstance(frontmatter_topics, str):
             frontmatter_topics = [frontmatter_topics]
 
@@ -431,22 +439,18 @@ def _snippets_table(db, all_times, config):
             "body": body,
         }
         if (body != previous_body) or not previous_html:
-
             record["html"] = github_markdown(body, path)
             print("Rendered HTML for {}".format(path))
 
         # Populate summary
-        record["summary"] = first_paragraph_text_only(
-            record.get("html") or previous_html or ""
-        )
+        record["summary"] = first_paragraph_text_only(record.get("html") or previous_html or "")
         record.update(all_times[path])
         with db.conn:
             table.upsert(record, alter=True)
 
     # enable full text search
-    table.enable_fts(
-        ["title", "body", "topics"], tokenize="porter", create_triggers=True, replace=True
-    )
+    table.enable_fts(["title", "body", "topics"], tokenize="porter", create_triggers=True, replace=True)
+
 
 def github_markdown(body, path):
     retries = 0
@@ -455,11 +459,7 @@ def github_markdown(body, path):
     while retries < 3:
         headers = {}
         if os.environ.get("MARKDOWN_GITHUB_TOKEN"):
-            headers = {
-                "authorization": "Bearer {}".format(
-                    os.environ["MARKDOWN_GITHUB_TOKEN"]
-                )
-            }
+            headers = {"authorization": "Bearer {}".format(os.environ["MARKDOWN_GITHUB_TOKEN"])}
         response = httpx.post(
             "https://api.github.com/markdown",
             json={
@@ -480,9 +480,7 @@ def github_markdown(body, path):
             time.sleep(60)
             retries += 1
     else:
-        assert False, "Could not render {} - last response was {}".format(
-            path, response.headers
-        )
+        assert False, "Could not render {} - last response was {}".format(path, response.headers)
     return html
 
 
