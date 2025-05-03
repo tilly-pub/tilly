@@ -1,20 +1,22 @@
+import html
 import os
 import re
-import html
 
-from datasette import hookimpl
 from bs4 import BeautifulSoup as Soup
+from datasette import hookimpl
 
 non_alphanumeric = re.compile(r"[^a-zA-Z0-9\s]")
 multi_spaces = re.compile(r"\s+")
 
 
 def first_paragraph(html):
+    """Extract the first paragraph from HTML content."""
     soup = Soup(html, "html.parser")
     return str(soup.find("p"))
 
 
 def highlight(s):
+    """Highlight the search term in the text."""
     s = html.escape(s)
     s = s.replace("b4de2a49c8", "<strong>").replace("8c94a2ed4b", "</strong>")
     return s
@@ -22,6 +24,8 @@ def highlight(s):
 
 @hookimpl
 def extra_template_vars(request, datasette):
+    """Extra template variables for Tilly."""
+
     async def related_tils(til):
         path = til["path"]
         sql = """
@@ -58,22 +62,24 @@ def extra_template_vars(request, datasette):
         "highlight": highlight,
         "first_paragraph": first_paragraph,
         "related_tils": related_tils,
-        "search_results": search_results
+        "search_results": search_results,
     }
 
 
 @hookimpl
 def prepare_connection(conn):
+    """Add custom functions to the SQLite connection."""
     conn.create_function("first_paragraph", 1, first_paragraph)
+
 
 @hookimpl
 def prepare_jinja2_environment(env):
+    """Add custom template variables to the Jinja2 environment."""
     if os.environ.get("TILLY_SEARCH", "datasette") == "static":
-        env.globals['search_type'] = 'static'
+        env.globals["search_type"] = "static"
     else:
-        env.globals['search_type'] = 'datasette'
+        env.globals["search_type"] = "datasette"
 
     # tilly config to env.globals
-    tilly_config_vars = {k: v for k,v in os.environ.items() if k.startswith("TILLY_")}
+    tilly_config_vars = {k: v for k, v in os.environ.items() if k.startswith("TILLY_")}
     env.globals = {**env.globals, **tilly_config_vars}
-

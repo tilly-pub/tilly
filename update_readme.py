@@ -1,13 +1,12 @@
-import re
 import pathlib
+import re
 import subprocess
 
 root = pathlib.Path(__file__).parent.resolve()
 
 
 def run_command_and_capture_output(command):
-    """
-    Runs a CLI command and captures its output into an array.
+    """Run a CLI command and captures its output into an array.
 
     :param command: A list where the first item is the command name and
                     subsequent items are command arguments.

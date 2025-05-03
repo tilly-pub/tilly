@@ -1,15 +1,16 @@
-import unittest
-import subprocess
-import os
-import tempfile
-import shutil
-import pathlib
 import filecmp
+import os
+import pathlib
+import shutil
+import subprocess
+import tempfile
+import unittest
+
+# ruff: noqa: D102, D103
+
 
 def are_dirs_equal(dir1, dir2):
-    """
-    Compare two directories recursively to check if they contain the same files with the same content.
-    """
+    """Compare two directories recursively to check if they contain the same files with the same content."""
     dcmp = filecmp.dircmp(dir1, dir2)
     if dcmp.left_only or dcmp.right_only or dcmp.diff_files:
         return False
@@ -20,7 +21,9 @@ def are_dirs_equal(dir1, dir2):
             return False
     return True
 
+
 class TestGitAndTillyCommands(unittest.TestCase):
+    """Test the git and tilly commands."""
 
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
@@ -86,5 +89,6 @@ tilly gen-static
         # shutil.copytree(static_files_folder, fixtures_folder, dirs_exist_ok=True)
         self.assertTrue(are_dirs_equal(static_files_folder, fixtures_folder), "Directories do not match")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

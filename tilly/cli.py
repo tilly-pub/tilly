@@ -1,27 +1,26 @@
-import os
+import asyncio
 import json
+import os
 import pathlib
 import shutil
 import time
-import asyncio
-
 from datetime import timezone
-
-import sqlite_utils
-from sqlite_utils.db import NotFoundError
-from bs4 import BeautifulSoup
-import httpx
 from http.server import HTTPServer, SimpleHTTPRequestHandler
-import git
-from datasette.app import Datasette
-import uvicorn
-from asgiref.sync import async_to_sync
 
 import click
+import git
+import httpx
+import sqlite_utils
+import uvicorn
+from asgiref.sync import async_to_sync
+from bs4 import BeautifulSoup
 from click import echo
+from datasette.app import Datasette
+from sqlite_utils.db import NotFoundError
+
 from .plugin import plugin_manager
-from .utils import load_config, local_config_file, add_config_to_env, static_folder
 from .search.pagefind import index_site
+from .utils import add_config_to_env, load_config, local_config_file, static_folder
 
 root = pathlib.Path.cwd()
 
@@ -129,7 +128,6 @@ def copy():
 # @click.option("template_folder", "-t", "--template-folder", help="Custom templates folder.")
 def config(local_config, url, base_url, google_analytics, output_folder="_static"):
     """List config."""
-
     config = {}
 
     if local_config:
@@ -155,6 +153,7 @@ def config(local_config, url, base_url, google_analytics, output_folder="_static
 
 
 def datasette(template_folder=None):
+    """Create a Datasette instance with the specified template folder."""
     script_dir = pathlib.Path(__file__).parent.parent / "tilly"
     template_folder = template_folder or script_dir / "templates"
 
@@ -167,6 +166,7 @@ def datasette(template_folder=None):
 
 
 def serve_datasette(template_folder=None):
+    """Serve the Datasette application."""
     ds = datasette(template_folder=template_folder)
 
     # Get the ASGI application and serve it
@@ -176,6 +176,7 @@ def serve_datasette(template_folder=None):
 
 @async_to_sync
 async def get(urls=None, template_folder=None):
+    """Fetch pages for the given URLs."""
     ds = datasette(template_folder)
     await ds.invoke_startup()
 
@@ -193,6 +194,7 @@ async def get(urls=None, template_folder=None):
 
 
 def write_html(pages):
+    """Write HTML files for the given pages."""
     static_root = root / static_folder()
     echo(f"write_html to {static_root}")
 
@@ -212,6 +214,7 @@ def write_html(pages):
 
 
 def write_static():
+    """Copy generated static files from the default directory to the output folder."""
     script_dir = pathlib.Path(__file__).parent.parent / "tilly"
     src = script_dir / "static"
     dst = root / static_folder()
@@ -222,6 +225,7 @@ def write_static():
 
 
 def add_search_index():
+    """Add search index using Pagefind."""
     src = root / static_folder()
     dst = root / static_folder() / "pagefind"
 
@@ -229,6 +233,7 @@ def add_search_index():
 
 
 def copy_templates(template_folder="templates"):
+    """Copy templates from the default directory to the current working directory."""
     script_dir = pathlib.Path(__file__).parent.parent / "tilly"
     src = script_dir / "templates"
     dst = root
@@ -246,10 +251,12 @@ def copy_templates(template_folder="templates"):
 
 
 def database(repo_path):
+    """Create or return the database."""
     return sqlite_utils.Database(repo_path / "tils.db")
 
 
 def build_database(repo_path):
+    """Build the database from the markdown files."""
     echo(f"build_database {repo_path}")
     config = load_config(local_config=True)
     all_times = created_changed_times(repo_path, "main")
@@ -367,12 +374,8 @@ def _snippets_table(db, all_times, config):
     # Reference to the table
     table = db.table("snippets", pk="path")
 
-    # Count of processed snippets
-    snippets_count = 0
-
     # Process any existing snippet files
-    for filepath in root.glob("_snippets*/*.md"):
-        snippets_count += 1
+    for snippets_count, filepath in enumerate(root.glob("_snippets*/*.md"), 1):
         print(filepath)
         # Read the entire file content
         content = filepath.read_text()
@@ -453,6 +456,7 @@ def _snippets_table(db, all_times, config):
 
 
 def github_markdown(body, path):
+    """Render markdown using GitHub API."""
     retries = 0
     response = None
     html = None
@@ -485,14 +489,14 @@ def github_markdown(body, path):
 
 
 def first_paragraph_text_only(html):
-    """
-    Extracts and returns the text of the first paragraph from a html object.
+    """Extract and returns the text of the first paragraph from a html object.
 
     Args:
         html: The HTML content.
 
     Returns:
         str: The text of the first paragraph, or an empty string if not found.
+
     """
     try:
         soup = BeautifulSoup(html, "html.parser")
@@ -505,8 +509,7 @@ def first_paragraph_text_only(html):
 
 
 def created_changed_times(repo_path, ref="main"):
-    """
-    Extract creation and modification timestamps for all files in a git repository.
+    """Extract creation and modification timestamps for all files in a git repository.
 
     Args:
         repo_path (str): Path to the git repository
@@ -521,6 +524,7 @@ def created_changed_times(repo_path, ref="main"):
 
     Raises:
         ValueError: If repository has uncommitted changes or untracked files
+
     """
     # Initialize empty dictionary to store file timestamps
     created_changed_times = {}

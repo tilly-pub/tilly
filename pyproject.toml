@@ -1,3 +1,17 @@
 [tool.ruff]
 show-fixes = true
 line-length = 140
+
+[tool.ruff.lint]
+select = [
+    "D", # docstrings
+    "I", # import sorting
+    "SIM", # Simplify code
+    "ASYNC", # Checks on async code
+    # "BLE", # Blind except statement
+]
+
+ignore = [
+    "D100",
+    "D104"
+]

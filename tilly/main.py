@@ -1,8 +1,8 @@
-from .cli import cli
-from .plugin import plugin_manager
-
 # Import built-in plugins or commands
 import tilly.commands.hello
+
+from .cli import cli
+from .plugin import plugin_manager
 
 # Register built-in plugins
 plugin_manager.register(tilly.commands.hello, "hello")
