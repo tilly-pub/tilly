@@ -1,0 +1,3 @@
+[tool.ruff]
+show-fixes = true
+line-length = 140
